@@ -3,7 +3,8 @@
 declare(strict_types=1);
 require_once $_SERVER["DOCUMENT_ROOT"] . "/backend/app/helpers/connection.php";
 use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+
+require $_SERVER["DOCUMENT_ROOT"] . "/backend/vendor/autoload.php";
 
 class User
 {
@@ -26,15 +27,23 @@ class User
       $e = $email;
       $p = $passw;
 
-      $stmt = $connection->prepare("SELECT email, passw FROM usuario WHERE email = ? and passw = ?");
+      $stmt = $connection->prepare("SELECT * FROM usuario WHERE email = ? and passw = ?");
       $stmt->execute([$email, $passw]);
-      $result = $stmt->id_usuario;
+      $results = $stmt->get_result();
+
+      $id_usuario = "";
+
+      while($row = $results->fetch_row()){
+        $id_usuario = $row[0];
+      }
+
+      print_r($id_usuario);
 
       $key = 'saliocabronelyk';
     
       $payload = [
         "email" => $email,
-        "id" => $result
+        "id" => $id_usuario,
       ];
 
       $jwt = JWT::encode($payload, $key, "HS256");
