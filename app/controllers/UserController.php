@@ -10,7 +10,7 @@ class UserController
 
       $token = User::auth_user($email, $passw);
 
-      echo json_encode($token);
+      echo json_encode(["token" => $token]);
     } catch (\Throwable $th) {
       echo json_encode(["msg" => $th->getMessage()]);
     }
