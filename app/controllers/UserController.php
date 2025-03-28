@@ -9,9 +9,10 @@ class UserController
       $passw = Flight::request()->data->passw;
 
       $token = User::auth_user($email, $passw);
-
+      
       echo json_encode(["token" => $token]);
     } catch (\Throwable $th) {
+      Flight::response()->status(400);
       echo json_encode(["msg" => $th->getMessage()]);
     }
   }
@@ -33,25 +34,34 @@ class UserController
     }
   }
 
-  public static function getUser(string $email)
+  public static function getUser()
   {
     try {
-      $user = User::get_user($email);
-      $row = [];
+      $headers = Flight::request()->getHeaders();
+      $token = Flight::request()->header("Authorization");
 
-      foreach ($user as $data) {
-        $json = new stdClass;
-        $json->nombre = $data["nombre"];
-        $json->apeP = $data["apeP"];
-        $json->apeM = $data["apeM"];
-        $json->email = $data["email"];
-        $json->passw = $data["passw"];
-        $json->direc = $data["direc"];
-
-        array_push($row, $json);
+      if(!$token){
+        Flight::jsonHalt([
+          "message" => "Token required"
+        ], 400);
       }
 
-      echo json_encode($row);
+      // $user = User::get_user($email);
+      // $row = [];
+
+      // foreach ($user as $data) {
+      //   $json = new stdClass;
+      //   $json->nombre = $data["nombre"];
+      //   $json->apeP = $data["apeP"];
+      //   $json->apeM = $data["apeM"];
+      //   $json->email = $data["email"];
+      //   $json->passw = $data["passw"];
+      //   $json->direc = $data["direc"];
+
+      //   array_push($row, $json);
+      // }
+
+      echo json_encode($headers);
     } catch (\Throwable $th) {
       echo json_encode(["msg" => $th->getMessage()]);
     }

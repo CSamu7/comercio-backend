@@ -4,7 +4,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/../helpers/connection.php';
 use Firebase\JWT\JWT;
 
-require_once 'C:/xampp/htdocs/comercio-backend/vendor/autoload.php';
+require_once $_SERVER["DOCUMENT_ROOT"] . '/backend/vendor/autoload.php';
+
 
 class User
 {
@@ -31,13 +32,15 @@ class User
       $stmt->execute([$email, $passw]);
       $results = $stmt->get_result();
 
+      if($results->num_rows <= 0){
+        throw new ErrorException("Correo/contraseña incorrectos");
+      }
+
       $id_usuario = "";
 
       while($row = $results->fetch_row()){
         $id_usuario = $row[0];
       }
-
-      print_r($id_usuario);
 
       $key = 'saliocabronelyk';
     
@@ -50,8 +53,7 @@ class User
 
       return $jwt;
     } catch (\Throwable $th) {
-      print_r($th);
-      return $th;
+      throw $th;
     }
   }
 
