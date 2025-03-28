@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../helpers/connection.php';
 use Firebase\JWT\JWT;
 
-require $_SERVER["DOCUMENT_ROOT"] . "/backend/vendor/autoload.php";
+require_once 'C:/xampp/htdocs/comercio-backend/vendor/autoload.php';
 
 class User
 {
