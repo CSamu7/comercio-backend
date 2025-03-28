@@ -1,5 +1,5 @@
 <?php
-require_once $_SERVER["DOCUMENT_ROOT"] . "/backend/app/models/User.php";
+require_once __DIR__ . '/../models/User.php';
 
 class UserController
 {
@@ -20,16 +20,41 @@ class UserController
   {
     try {
       $data = Flight::request()->data;
-      $idClients = [];
+      $idUsuarios = [];
 
       foreach ($data as $info) {
         $user = new User($info["nombre"], $info["apeP"], $info["apeM"], $info["email"], $info["passw"], $info["direc"]);
-        array_push($idClients, $user->post_user());
+        array_push($idUsuarios, $user->post_user());
       }
 
-      echo json_encode($idClients);
+      echo json_encode($idUsuarios);
     } catch (\Throwable $th) {
       echo json_encode(["msg" => $th]);
     }
   }
+
+  public static function getUser(string $email)
+  {
+    try {
+      $user = User::get_user($email);
+      $row = [];
+
+      foreach ($user as $data) {
+        $json = new stdClass;
+        $json->nombre = $data["nombre"];
+        $json->apeP = $data["apeP"];
+        $json->apeM = $data["apeM"];
+        $json->email = $data["email"];
+        $json->passw = $data["passw"];
+        $json->direc = $data["direc"];
+
+        array_push($row, $json);
+      }
+
+      echo json_encode($row);
+    } catch (\Throwable $th) {
+      echo json_encode(["msg" => $th->getMessage()]);
+    }
+  }
+
 }

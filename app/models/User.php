@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-require_once $_SERVER["DOCUMENT_ROOT"] . "/backend/app/helpers/connection.php";
+require_once __DIR__ . '/../helpers/connection.php';
 use Firebase\JWT\JWT;
 
 require $_SERVER["DOCUMENT_ROOT"] . "/backend/vendor/autoload.php";
@@ -61,8 +61,8 @@ class User
       $db = new Database();
       $connection = $db->connect_to_db();
 
-      $stmt = $connection->prepare("INSERT INTO usuario(nombre_Cliente, apellidos_Cliente, curp, telefono, direccion) VALUES (?, ?, ?, ?, ?)");
-      $stmt->execute([$this->name, $this->lastname, $this->curp, $this->phoneNumber, $this->address]);
+      $stmt = $connection->prepare("INSERT INTO usuario(nombre, apeP, apeM, email, passw, direc) VALUES (?, ?, ?, ?, ?, ?)");
+      $stmt->execute([$this->nombre, $this->apeP, $this->apeM, $this->email, $this->passw, $this->direc]);
       $result = $stmt->insert_id;
       return $result;
     } catch (\Throwable $th) {
@@ -76,8 +76,8 @@ class User
     $connection = $db->connect_to_db();
     $rows = [];
 
-    $stmt = $connection->prepare("SELECT * FROM Cliente WHERE email = ?");
-    $stmt->bind_param("d", $id_user);
+    $stmt = $connection->prepare("SELECT * FROM usuario WHERE email = ?");
+    $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
