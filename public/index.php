@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../app/middlewares/cors.php';
 require_once __DIR__ . '/../app/controllers/UserController.php';
+require_once __DIR__ . '/../app/controllers/ProductController.php';
 require __DIR__ . '/../vendor/autoload.php';
 
 //$CorsUtil = new CorsUtil();
@@ -15,5 +16,10 @@ Flight::group("/api", function () {
   Flight::route("POST /auth", ['UserController', 'authUser']);
   Flight::route("POST /user", ['UserController', 'postUser']);
 });
+
+Flight::group("/api/product", function () {
+  Flight::route("GET /@id_prod", ['ProductController', 'getProduct']);
+});
+
 
 Flight::start();
