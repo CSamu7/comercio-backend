@@ -24,10 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 	exit(0);
 }
 
-Flight::route("GET /hello-world/@name", function($name) {
-  echo '<h1>Hello world! Oh hey ' . $name . '!</h1>';
-});
-
 Flight::group("/user", function () {
   Flight::route("GET /", 'UserController->getUser');
   Flight::route("POST /auth", 'UserController->authUser');

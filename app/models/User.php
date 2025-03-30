@@ -1,15 +1,15 @@
 <?php
-
 declare(strict_types=1);
 require_once __DIR__ . '/../helpers/connection.php';
+require_once __DIR__ . '/../helpers/token.php';
+
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 require_once $_SERVER["DOCUMENT_ROOT"] . '/backend/vendor/autoload.php';
 
-
 class User
 {
-
   public function __construct(
     private string $nombre,
     private string $apeP,
@@ -24,16 +24,13 @@ class User
     try {
       $db = new Database();
       $connection = $db->connect_to_db();
-      
-      $e = $email;
-      $p = $passw;
 
       $stmt = $connection->prepare("SELECT * FROM usuario WHERE email = ? and passw = ?");
       $stmt->execute([$email, $passw]);
       $results = $stmt->get_result();
 
       if($results->num_rows <= 0){
-        throw new ErrorException("Correo/contraseña incorrectos");
+        Flight::jsonHalt(['msg'=>"Contraseña/Correo incorrectos"], 400);
       }
 
       $id_usuario = "";
@@ -42,7 +39,7 @@ class User
         $id_usuario = $row[0];
       }
 
-      $key = 'saliocabronelyk';
+      $key = 'ykesuncabron';
     
       $payload = [
         "email" => $email,
@@ -72,15 +69,16 @@ class User
     }
   }
 
-  public static function get_user(string $email): array
+  public static function get_user(string $token): array
   {
+    $decoded = Token::decode_token($token);
+
     $db = new Database();
     $connection = $db->connect_to_db();
     $rows = [];
 
     $stmt = $connection->prepare("SELECT * FROM usuario WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
+    $stmt->execute([$decoded->email]);
     $result = $stmt->get_result();
 
     foreach ($result as $user) {
