@@ -39,4 +39,22 @@ class Product
 
     return $rows;
   }
+
+  public static function get_products(): array
+  {
+    $db = new Database();
+    $connection = $db->connect_to_db();
+    $rows = [];
+
+    $stmt = $connection->prepare("SELECT * FROM producto");
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    foreach ($result as $product) {
+      array_push($rows, $product);
+    }
+
+    return $rows;
+  }
+
 }

@@ -61,6 +61,16 @@ class User
       $db = new Database();
       $connection = $db->connect_to_db();
 
+      $stmt = $connection->prepare("SELECT COUNT(*) as count FROM usuario WHERE email = ?");
+        $stmt->bind_param("s", $this->email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+
+        if ($row['count'] > 0) {
+            throw new Exception("El email ya está en uso");
+        }
+
       $stmt = $connection->prepare("INSERT INTO usuario(nombre, apeP, apeM, email, passw, direc) VALUES (?, ?, ?, ?, ?, ?)");
       $stmt->execute([$this->nombre, $this->apeP, $this->apeM, $this->email, $this->passw, $this->direc]);
       $result = $stmt->insert_id;
@@ -70,21 +80,32 @@ class User
     }
   }
 
-  public static function get_user(string $email): array
-  {
-    $db = new Database();
-    $connection = $db->connect_to_db();
-    $rows = [];
+  public static function get_user(string $token): array
+{
+    try {
+        $key = 'saliocabronelyk';
+        $decoded = JWT::decode($token, $key, ["HS256"]);
+        $id_usuario = $decoded->id;
 
-    $stmt = $connection->prepare("SELECT * FROM usuario WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+        $db = new Database();
+        $connection = $db->connect_to_db();
 
-    foreach ($result as $user) {
-      array_push($rows, $user);
+        $stmt = $connection->prepare("SELECT * FROM usuario WHERE id = ?");
+        $stmt->bind_param("i", $id_usuario);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $rows = [];
+
+        foreach ($result as $user) {
+            array_push($rows, $user);
+        }
+
+        return $rows;
+    } catch (\Throwable $th) {
+        print_r($th);
+        return [];
     }
+}
 
-    return $rows;
-  }
 }

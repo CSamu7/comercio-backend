@@ -21,22 +21,37 @@ class UserController
     try {
       $data = Flight::request()->data;
       $idUsuarios = [];
+      $errores = [];
 
       foreach ($data as $info) {
-        $user = new User($info["nombre"], $info["apeP"], $info["apeM"], $info["email"], $info["passw"], $info["direc"]);
-        array_push($idUsuarios, $user->post_user());
+          $user = new User($info["nombre"], $info["apeP"], $info["apeM"], $info["email"], $info["passw"], $info["direc"]);
+          $resultado = $user->post_user();
+
+          if (is_int($resultado)) {
+              array_push($idUsuarios, $resultado);
+          } else {
+              if ($resultado instanceof Exception) {
+                  array_push($errores, ["email" => $info["email"], "msg" => $resultado->getMessage()]);
+              } else {
+                  array_push($errores, ["email" => $info["email"], "msg" => "Error al crear usuario. Es posible que el correo que ingresaste no se encuentre disponible."]);
+              }
+          }
       }
 
-      echo json_encode($idUsuarios);
-    } catch (\Throwable $th) {
+      if (!empty($errores)) {
+          echo json_encode(["errores" => $errores, "id" => $idUsuarios]);
+      } else {
+          echo json_encode($idUsuarios);
+      }
+  } catch (\Throwable $th) {
       echo json_encode(["msg" => $th]);
-    }
+  }
   }
 
-  public static function getUser(string $email)
+  public static function getUser(string $token)
   {
     try {
-      $user = User::get_user($email);
+      $user = User::get_user($token);
       $row = [];
 
       foreach ($user as $data) {

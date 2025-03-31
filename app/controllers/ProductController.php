@@ -30,4 +30,13 @@ class ProductController
     }
   }
 
-}
+  public static function getProducts()
+  {
+      try {
+          $products = Product::get_products();
+          echo json_encode($products);
+      } catch (\Throwable $th) {
+          echo json_encode(["msg" => $th->getMessage()]);
+      }
+  }
+  }
