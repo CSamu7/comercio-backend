@@ -1,14 +1,15 @@
 <?php
-
 declare(strict_types=1);
 require_once __DIR__ . '/../helpers/connection.php';
-use Firebase\JWT\JWT;
+require_once __DIR__ . '/../helpers/token.php';
 
-require_once 'C:/xampp/htdocs/comercio-backend/vendor/autoload.php';
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+require_once $_SERVER["DOCUMENT_ROOT"] . '/backend/vendor/autoload.php';
 
 class User
 {
-
   public function __construct(
     private string $nombre,
     private string $apeP,
@@ -23,13 +24,14 @@ class User
     try {
       $db = new Database();
       $connection = $db->connect_to_db();
-      
-      $e = $email;
-      $p = $passw;
 
       $stmt = $connection->prepare("SELECT * FROM usuario WHERE email = ? and passw = ?");
       $stmt->execute([$email, $passw]);
       $results = $stmt->get_result();
+
+      if($results->num_rows <= 0){
+        Flight::jsonHalt(['msg'=>"Contraseña/Correo incorrectos"], 400);
+      }
 
       $id_usuario = "";
 
@@ -37,9 +39,7 @@ class User
         $id_usuario = $row[0];
       }
 
-      print_r($id_usuario);
-
-      $key = 'saliocabronelyk';
+      $key = 'ykesuncabron';
     
       $payload = [
         "email" => $email,
@@ -50,8 +50,7 @@ class User
 
       return $jwt;
     } catch (\Throwable $th) {
-      print_r($th);
-      return $th;
+      throw $th;
     }
   }
 
@@ -81,31 +80,21 @@ class User
   }
 
   public static function get_user(string $token): array
-{
-    try {
-        $key = 'saliocabronelyk';
-        $decoded = JWT::decode($token, $key, ["HS256"]);
-        $id_usuario = $decoded->id;
+  {
+    $decoded = Token::decode_token($token);
 
-        $db = new Database();
-        $connection = $db->connect_to_db();
+    $db = new Database();
+    $connection = $db->connect_to_db();
+    $rows = [];
 
-        $stmt = $connection->prepare("SELECT * FROM usuario WHERE id = ?");
-        $stmt->bind_param("i", $id_usuario);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        $rows = [];
+    $stmt = $connection->prepare("SELECT * FROM usuario WHERE email = ?");
+    $stmt->execute([$decoded->email]);
+    $result = $stmt->get_result();
 
         foreach ($result as $user) {
             array_push($rows, $user);
         }
 
         return $rows;
-    } catch (\Throwable $th) {
-        print_r($th);
-        return [];
     }
-}
-
 }

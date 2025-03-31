@@ -4,8 +4,6 @@ require_once __DIR__ . '/../app/controllers/UserController.php';
 require_once __DIR__ . '/../app/controllers/ProductController.php';
 require __DIR__ . '/../vendor/autoload.php';
 
-//$CorsUtil = new CorsUtil();
-//Flight::before('start', [ $CorsUtil, 'setupCors' ]);
 if (isset($_SERVER['HTTP_ORIGIN'])) {
 	header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
 	header('Access-Control-Allow-Credentials: true');
@@ -26,14 +24,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 	exit(0);
 }
 
-Flight::route("GET /hello-world/@name", function($name) {
-  echo '<h1>Hello world! Oh hey ' . $name . '!</h1>';
-});
-
-Flight::group("/api", function () {
-  Flight::route("GET /user/token/@token", ['UserController', 'getUser']);
-  Flight::route("POST /auth", ['UserController', 'authUser']);
-  Flight::route("POST /user", ['UserController', 'postUser']);
+Flight::group("/user", function () {
+  Flight::route("GET /", 'UserController->getUser');
+  Flight::route("POST /auth", 'UserController->authUser');
+  Flight::route("POST /", 'UserController->postUser');
 });
 
 Flight::group("/api/product", function () {

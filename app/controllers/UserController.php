@@ -9,7 +9,7 @@ class UserController
       $passw = Flight::request()->data->passw;
 
       $token = User::auth_user($email, $passw);
-
+      
       echo json_encode(["token" => $token]);
     } catch (\Throwable $th) {
       echo json_encode(["msg" => $th->getMessage()]);
@@ -48,9 +48,17 @@ class UserController
   }
   }
 
-  public static function getUser(string $token)
+  public static function getUser()
   {
     try {
+      $token = Flight::request()->header("Authorization");
+
+      if(!$token){
+        Flight::jsonHalt([
+          "message" => "Token required"
+        ], 400);
+      }
+
       $user = User::get_user($token);
       $row = [];
 
@@ -60,7 +68,6 @@ class UserController
         $json->apeP = $data["apeP"];
         $json->apeM = $data["apeM"];
         $json->email = $data["email"];
-        $json->passw = $data["passw"];
         $json->direc = $data["direc"];
 
         array_push($row, $json);
