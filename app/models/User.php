@@ -67,15 +67,15 @@ class User
     $stmt->execute([$this->email]);
     $result = $stmt->get_result();
   
-    return $result->num_rows > 0;
+    return $result->num_rows == 0;
   }
 
   public function post_user(): int
   {
       $db = new Database();
       $connection = $db->connect_to_db();
-      
-      if(!is_email_available($connection)){
+
+      if(!$this->is_email_available($connection)){
         Flight::jsonHalt(['msg'=>"Este correo no esta disponible"], 409);
       }
 

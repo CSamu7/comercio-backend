@@ -23,29 +23,9 @@ class UserController
       $idUsuarios = [];
 
       $user = new User($data);
-      $user->post_user();
+      $response = $user->post_user();
 
-      // foreach ($data as $info) {
-      //   echo $info;
-      //     $user = new User($info["nombre"], $info["apeP"], $info["apeM"], $info["email"], $info["passw"], $info["direc"]);
-      //     $resultado = $user->post_user();
-
-      //     if (is_int($resultado)) {
-      //         array_push($idUsuarios, $resultado);
-      //     } else {
-      //         if ($resultado instanceof Exception) {
-      //             array_push($errores, ["email" => $info["email"], "msg" => $resultado->getMessage()]);
-      //         } else {
-      //             array_push($errores, ["email" => $info["email"], "msg" => "Error al crear usuario. Es posible que el correo que ingresaste no se encuentre disponible."]);
-      //         }
-      //     }
-      // }
-
-      // if (!empty($errores)) {
-      //     echo json_encode(["errores" => $errores, "id" => $idUsuarios]);
-      // } else {
-      //     echo json_encode($idUsuarios);
-      // }
+      echo json_encode(["id_user", $response]);
   } catch (\Throwable $th) {
       echo $th;
       echo json_encode(["msg" => $th->getMessage()]);
