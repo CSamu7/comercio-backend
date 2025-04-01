@@ -10,14 +10,22 @@ require_once $_SERVER["DOCUMENT_ROOT"] . '/backend/vendor/autoload.php';
 
 class User
 {
+  private string $nombre;
+  private string $apeP;
+  private string $apeM;
+  private string $email;
+  private string $passw;
+  private string $direc;
+
   public function __construct(
-    private string $nombre,
-    private string $apeP,
-    private string $apeM,
-    private string $email,
-    private string $passw,
-    private string $direc,
+    object $data,
   ) {
+    $this->nombre = $data["nombre"];
+    $this->apeP = $data["apeP"];
+    $this->apeM = $data["apeM"];
+    $this->email = $data["email"];
+    $this->passw = $data["passw"];
+    $this->direc = $data["direc"];
   }
 
   public static function auth_user(string $email, string $passw) {
@@ -54,29 +62,27 @@ class User
     }
   }
 
+  private function is_email_available($connection): bool {
+    $stmt = $connection->prepare("SELECT email FROM usuario WHERE email = ?");
+    $stmt->execute([$this->email]);
+    $result = $stmt->get_result();
+  
+    return $result->num_rows > 0;
+  }
+
   public function post_user(): int
   {
-    try {
       $db = new Database();
       $connection = $db->connect_to_db();
-
-      $stmt = $connection->prepare("SELECT COUNT(*) as count FROM usuario WHERE email = ?");
-        $stmt->bind_param("s", $this->email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-
-        if ($row['count'] > 0) {
-            throw new Exception("El email ya está en uso");
-        }
+      
+      if(!is_email_available($connection)){
+        Flight::jsonHalt(['msg'=>"Este correo no esta disponible"], 409);
+      }
 
       $stmt = $connection->prepare("INSERT INTO usuario(nombre, apeP, apeM, email, passw, direc) VALUES (?, ?, ?, ?, ?, ?)");
       $stmt->execute([$this->nombre, $this->apeP, $this->apeM, $this->email, $this->passw, $this->direc]);
       $result = $stmt->insert_id;
       return $result;
-    } catch (\Throwable $th) {
-      return $th;
-    }
   }
 
   public static function get_user(string $token): array

@@ -21,30 +21,34 @@ class UserController
     try {
       $data = Flight::request()->data;
       $idUsuarios = [];
-      $errores = [];
 
-      foreach ($data as $info) {
-          $user = new User($info["nombre"], $info["apeP"], $info["apeM"], $info["email"], $info["passw"], $info["direc"]);
-          $resultado = $user->post_user();
+      $user = new User($data);
+      $user->post_user();
 
-          if (is_int($resultado)) {
-              array_push($idUsuarios, $resultado);
-          } else {
-              if ($resultado instanceof Exception) {
-                  array_push($errores, ["email" => $info["email"], "msg" => $resultado->getMessage()]);
-              } else {
-                  array_push($errores, ["email" => $info["email"], "msg" => "Error al crear usuario. Es posible que el correo que ingresaste no se encuentre disponible."]);
-              }
-          }
-      }
+      // foreach ($data as $info) {
+      //   echo $info;
+      //     $user = new User($info["nombre"], $info["apeP"], $info["apeM"], $info["email"], $info["passw"], $info["direc"]);
+      //     $resultado = $user->post_user();
 
-      if (!empty($errores)) {
-          echo json_encode(["errores" => $errores, "id" => $idUsuarios]);
-      } else {
-          echo json_encode($idUsuarios);
-      }
+      //     if (is_int($resultado)) {
+      //         array_push($idUsuarios, $resultado);
+      //     } else {
+      //         if ($resultado instanceof Exception) {
+      //             array_push($errores, ["email" => $info["email"], "msg" => $resultado->getMessage()]);
+      //         } else {
+      //             array_push($errores, ["email" => $info["email"], "msg" => "Error al crear usuario. Es posible que el correo que ingresaste no se encuentre disponible."]);
+      //         }
+      //     }
+      // }
+
+      // if (!empty($errores)) {
+      //     echo json_encode(["errores" => $errores, "id" => $idUsuarios]);
+      // } else {
+      //     echo json_encode($idUsuarios);
+      // }
   } catch (\Throwable $th) {
-      echo json_encode(["msg" => $th]);
+      echo $th;
+      echo json_encode(["msg" => $th->getMessage()]);
   }
   }
 
