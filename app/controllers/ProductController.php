@@ -3,23 +3,23 @@ require_once __DIR__ . '/../models/Product.php';
 
 class ProductController
 {
-  public static function getProduct(int $id_prod)
+  public static function getProduct(int $id)
   {
     try {
-      $product = Product::get_product($id_prod);
+      $product = Product::get_product($id);
       $row = [];
 
       foreach ($product as $data) {
         $json = new stdClass;
-        $json->nombre_prod = $data["nombre_prod"];
-        $json->nombrecorto_prod = $data["nombrecorto_prod"];
-        $json->descripcion_prod = $data["descripcion_prod"];
+        $json->nombre = $data["nombre_prod"];
+        $json->nombrecorto = $data["nombrecorto_prod"];
+        $json->descripcion = $data["descripcion_prod"];
         $json->precio = $data["precio"];
         $json->url_imagen = $data["url_imagen"];
         $json->stock = $data["stock"];
-        $json->id_departamento = $data["id_departamento"];
-        $json->id_marca = $data["id_marca"];
-        $json->id_oferta = $data["id_oferta"];
+        $json->departamento = $data["nombre_departamento"];
+        $json->marca = $data["nombre_marca"];
+        $json->descuento = $data["descuento"];
 
         array_push($row, $json);
       }
