@@ -75,6 +75,9 @@ class User
       $db = new Database();
       $connection = $db->connect_to_db();
 
+      if (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
+        Flight::jsonHalt(['msg' => "Correo inválido"], 400);
+      }
       if(!$this->is_email_available($connection)){
         Flight::jsonHalt(['msg'=>"Este correo no esta disponible"], 409);
       }

@@ -17,20 +17,26 @@ class UserController
   }
 
   public static function postUser()
-  {
+{
     try {
-      $data = Flight::request()->data;
-      $idUsuarios = [];
+        $data = Flight::request()->data;
 
-      $user = new User($data);
-      $response = $user->post_user();
+        // Validación del correo electrónico
+        $email = filter_var($data->email, FILTER_VALIDATE_EMAIL);
+        if (!$email) {
+            Flight::jsonHalt(['msg' => "Correo inválido"], 400);
+        }
 
-      echo json_encode(["id_user", $response]);
-  } catch (\Throwable $th) {
-      echo $th;
-      echo json_encode(["msg" => $th->getMessage()]);
-  }
-  }
+        $user = new User($data);
+        $response = $user->post_user();
+
+        echo json_encode(["id" => $response]);
+    } catch (\Throwable $th) {
+        echo $th
+        echo json_encode(["msg" => $th->getMessage()]);
+    }
+}
+
 
   public static function getUser()
   {
