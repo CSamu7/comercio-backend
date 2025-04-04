@@ -44,7 +44,7 @@ class Product
             departamento d ON p.id_departamento = d.id_departamento
         INNER JOIN 
             marca m ON p.id_marca = m.id_marca
-        INNER JOIN
+        LEFT JOIN
             oferta o ON p.id_oferta = o.id_oferta
         WHERE 
             p.id_prod = ?
@@ -84,7 +84,7 @@ class Product
             departamento d ON p.id_departamento = d.id_departamento
         INNER JOIN 
             marca m ON p.id_marca = m.id_marca
-        INNER JOIN
+        LEFT JOIN
             oferta o ON p.id_oferta = o.id_oferta
     ");
     $stmt->execute();
