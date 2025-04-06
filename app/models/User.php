@@ -100,10 +100,10 @@ class User
     $stmt->execute([$decoded->email]);
     $result = $stmt->get_result();
 
-        foreach ($result as $user) {
-            array_push($rows, $user);
-        }
+    foreach ($result as $user) {
+      array_push($rows, $user);
+    }
 
-        return $rows;
+    return $rows;
     }
 }

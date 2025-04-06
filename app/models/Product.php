@@ -29,6 +29,7 @@ class Product
 
     $stmt = $connection->prepare("
         SELECT 
+            p.id_prod,
             p.nombre_prod, 
             p.nombrecorto_prod, 
             p.descripcion_prod, 
@@ -69,6 +70,7 @@ class Product
 
     $stmt = $connection->prepare("
         SELECT 
+            p.id_prod,
             p.nombre_prod, 
             p.nombrecorto_prod, 
             p.descripcion_prod, 

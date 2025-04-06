@@ -30,8 +30,8 @@ Flight::group("/user", function () {
   Flight::route("POST /", 'UserController->postUser');
 });
 
-Flight::group("/api/product", function () {
-  Flight::route("GET /all", ['ProductController', 'getProducts']);
+Flight::group("/product", function () {
+  Flight::route("GET /", ['ProductController', 'getProducts']);
   Flight::route("GET /@id_prod", ['ProductController', 'getProduct']);
 });
 

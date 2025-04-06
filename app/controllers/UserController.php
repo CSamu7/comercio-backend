@@ -32,7 +32,6 @@ class UserController
 
         echo json_encode(["id" => $response]);
     } catch (\Throwable $th) {
-        echo $th
         echo json_encode(["msg" => $th->getMessage()]);
     }
 }
