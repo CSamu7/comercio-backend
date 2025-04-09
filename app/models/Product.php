@@ -39,6 +39,7 @@ class Product
             d.nombre_departamento AS nombre_departamento, 
             m.nombre_marca AS nombre_marca, 
             o.descuento AS descuento
+            COALESCE(r.rating_promedio, 0) AS rating
         FROM 
             producto p
         INNER JOIN 
@@ -47,6 +48,16 @@ class Product
             marca m ON p.id_marca = m.id_marca
         LEFT JOIN
             oferta o ON p.id_oferta = o.id_oferta
+        LEFT JOIN 
+            (
+                SELECT 
+                    id_prod,
+                    AVG(punt) AS rating_promedio
+                FROM 
+                    reseña
+                GROUP BY 
+                    id_prod
+            ) r ON p.id_prod = r.id_prod
         WHERE 
             p.id_prod = ?
     ");
@@ -80,6 +91,7 @@ class Product
             d.nombre_departamento AS nombre_departamento, 
             m.nombre_marca AS nombre_marca, 
             o.descuento AS descuento
+            COALESCE(r.rating_promedio, 0) AS rating
         FROM 
             producto p
         INNER JOIN 
@@ -88,6 +100,16 @@ class Product
             marca m ON p.id_marca = m.id_marca
         LEFT JOIN
             oferta o ON p.id_oferta = o.id_oferta
+        LEFT JOIN 
+            (
+                SELECT 
+                    id_prod,
+                    AVG(punt) AS rating_promedio
+                FROM 
+                    reseña
+                GROUP BY 
+                    id_prod
+            ) r ON p.id_prod = r.id_prod
     ");
     $stmt->execute();
     $result = $stmt->get_result();
