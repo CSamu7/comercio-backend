@@ -21,20 +21,24 @@ class cart{
       }
     
     public static function get_products($product_id){
-        $query="SELECT ID_CARRITO, ID_USUARIO, ID_PROD, CANTIDAD, PRECIO_UNITARIO FROM CARRITO_COMPRAS WHERE id_prod= ?";
+        $db = new Database();
+        $connection = $db->connect_to_db();
+        $stmt = $connection->prepare("SELECT ID_CARRITO, ID_USUARIO, ID_PROD, CANTIDAD, PRECIO_UNITARIO FROM CARRITO_COMPRAS WHERE id_prod= ?");
         $params = array(
             array(
                 "param_type" => "i",
                 "param_value" => $product_id
             )
         );
-        
-        $cartResult = $this->getDBResult($query, $params);
+        $stmt->execute([$this->product_id]);
+        $cartResult = $stmt->get_result();
         return $cartResult;
     }
 
     public static function updateCart($cantidad, $id_carrito, $id_prod){
-        $query = "UPDATE carrito_compras SET  cantidad = ? WHERE id_carrito= ? AND id_prod= ?";
+        $db = new Database();
+        $connection = $db->connect_to_db();
+        $stmt = $connection->prepare("UPDATE carrito_compras SET  cantidad = ? WHERE id_carrito= ? AND id_prod= ?");
         
         $params = array(
             array(
@@ -50,13 +54,15 @@ class cart{
                 "param_value" => $id_prod
             )
         );
+        $stmt->execute();
         
-        $this->updateDB($query, $params);
     }
 
     function deleteCartItem($id_carrito)
     {
-        $query = "DELETE FROM carrito_compras WHERE id_carrito = ?";
+        $db = new Database();
+        $connection = $db->connect_to_db();
+        $stmt = $connection->prepare("DELETE FROM carrito_compras WHERE id_carrito = ?");
         
         $params = array(
             array(
@@ -65,7 +71,7 @@ class cart{
             )
         );
         
-        $this->updateDB($query, $params);
+        $stmt->execute();
     }
 
 }
