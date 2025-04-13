@@ -38,7 +38,7 @@ class Product
             p.stock, 
             d.nombre_departamento AS nombre_departamento, 
             m.nombre_marca AS nombre_marca, 
-            o.descuento AS descuento
+            o.descuento AS descuento,
             COALESCE(r.rating_promedio, 0) AS rating
         FROM 
             producto p
@@ -90,7 +90,7 @@ class Product
             p.stock, 
             d.nombre_departamento AS nombre_departamento, 
             m.nombre_marca AS nombre_marca, 
-            o.descuento AS descuento
+            o.descuento AS descuento,
             COALESCE(r.rating_promedio, 0) AS rating
         FROM 
             producto p
