@@ -1,9 +1,9 @@
 <?php
 require_once 'IS_Conexion.php';
 
-function crearUsuario($nombre, $apP, $apM, $email, $passw, $dirc) {
+function crearUsuario($nombre, $apeP, $apeM, $email, $passw, $direc) {
     global $db;
-    $query = "INSERT INTO usuario (nombre, apP, apM, email, passw, dirc) VALUES ('$nombre', '$apP', '$apM', '$email', '$passw', '$dirc')";
+    $query = "INSERT INTO USUARIO (nombre, apeP, apeM, email, passw, direc) VALUES ('$nombre', '$apeP', '$apeM', '$email', '$passw', '$direc')";
     $result = $db->query($query);
 
     if ($result) {
@@ -14,7 +14,7 @@ function crearUsuario($nombre, $apP, $apM, $email, $passw, $dirc) {
 }
 
 function buscarUsuarios() {
-    $query = "SELECT * FROM usuario";
+    $query = "SELECT * FROM USUARIO";
     global $db;
     $result = $db->query($query);
     $usuarios = array();
@@ -25,8 +25,8 @@ function buscarUsuarios() {
     return $usuarios;
 }
 
-function buscarUsuarioId($id) {
-    $query = "SELECT * FROM usuario WHERE id_usuario = $id";
+function buscarUsuarioId($id_usuario) {
+    $query = "SELECT * FROM USUARIO WHERE id_usuario = $id_usuario";
     $result = $db->query($query);
 
     if ($result->num_rows > 0) {
@@ -36,8 +36,8 @@ function buscarUsuarioId($id) {
     }
 }
 
-function actualizarUsuario($id, $nombre, $apP, $apM, $email, $passw, $dirc) {
-    $query = "UPDATE usuario SET nombre = '$nombre', apP = '$apP', apM = '$apM', email = '$email', passw = '$passw', dirc = '$dirc' WHERE id_usuario = $id";
+function actualizarUsuario($id_usuario, $nombre, $apeP, $apeM, $email, $passw, $direc) {
+    $query = "UPDATE USUARIO SET nombre = '$nombre', apeP = '$apeP', apeM = '$apeM', email = '$email', passw = '$passw', direc = '$direc' WHERE id_usuario = $id_usuario";
     $result = $db->query($query);
 
     if ($result) {
@@ -47,13 +47,44 @@ function actualizarUsuario($id, $nombre, $apP, $apM, $email, $passw, $dirc) {
     }
 }
 
-function eliminarUsuario($id) {
-    $query = "DELETE FROM usuario WHERE id_usuario = $id";
+function eliminarUsuario($id_usuario) {
+    $query = "DELETE FROM USUARIO WHERE id_usuario = $id_usuario";
     $result = $db->query($query);
 
     if ($result) {
         return array('mensaje' => 'Usuario eliminado con éxito');
     } else {
         return array('error' => 'Error al eliminar el usuario');
+    }
+}
+
+function iniciarSesion($email, $passw) {
+    global $db;
+    $query = "SELECT * FROM USUARIO WHERE email = '$email'";
+    $result = $db->query($query);
+
+    if ($result->num_rows > 0) {
+        $usuario = $result->fetch_assoc();
+        if (password_verify($passw, $usuario['passw'])) {
+            $token = uniqid('', true);
+            $query = "UPDATE USUARIO SET token = '$token' WHERE id_usuario = $usuario[id_usuario]";
+            $db->query($query);
+            return array('token' => $token);
+        } else {
+            return array('error' => 'Datos incorrectos');
+        }
+    } else {
+        return array('error' => 'Datos incorrectos');
+    }
+}
+
+function validarToken($token) {
+    global $db;
+    $query = "SELECT * FROM USUARIO WHERE token = '$token'";
+    $result = $db->query($query);
+    if ($result->num_rows > 0) {
+        return true;
+    } else {
+        return false;
     }
 }
