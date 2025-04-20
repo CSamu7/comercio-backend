@@ -20,6 +20,7 @@ class ProductController
         $json->departamento = $data["nombre_departamento"];
         $json->marca = $data["nombre_marca"];
         $json->descuento = $data["descuento"];
+        $json->precio_descuento = round(floatval($data["precio_descuento"]), 2);
 
         array_push($row, $json);
       }
