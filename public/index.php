@@ -36,7 +36,11 @@ Flight::group("/product", function () {
 });
 
 Flight::groupt("/shopping-cart", function() {
-	Flight::route("GET /@id_user", "ShoppingCartController-getShoppingCart");
+	Flight::route("GET /@id_user", ['ShoppingCartController-getShoppingCart']);
+	Flight::route("POST /add", ['ShoppingCartController', 'addCartItem']);
+	Flight::route("PUT /update", ['ShoppingCartController', 'updateCartItem']);
+	Flight::route("DELETE /delete", ['ShoppingCartController', 'deleteCartItem']);
+	Flight::route("DELETE /clear", ['ShoppingCartController', 'clearCart']);
 });
 
 Flight::start();
