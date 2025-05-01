@@ -1,71 +1,80 @@
+
 <?php
-    declare(strict_types=1);
-    require_once __DIR__ . '/../helpers/connection.php';
-    use Firebase\JWT\JWT;
+declare(strict_types=1);
+require_once __DIR__ . '/../helpers/connection.php';
+use Firebase\JWT\JWT;
     
-    require_once $_SERVER["DOCUMENT_ROOT"] . '/comercio-backend-main/vendor/autoload.php';
+require_once $_SERVER["DOCUMENT_ROOT"] . '/comercio-backend-main/vendor/autoload.php';
 
-class cart{
-    private int $id_carrito;
+class Cart{
     private int $id_usuario;
-    private int $id_prod;
-    private int $cantidad;
-    private float $precio_unitario;
+    private $connection;
 
-    public function __construct(object $data,) {
-        $this->id_carrito = $data["id_carrito"];
-        $this->id_usuario = $data["id_usuario"];
-        $this->id_prod = $data["id_prod"];
-        $this->cantidad = $data["cantidad"];
-        $this->precio_unitario = $data["precio_unitario"];
-      }
+    public function __construct(int $id_usuario) {
+        $this->id_usuario = $id_usuario;
+        $db = new Database();
+        $this->connection = $db->connect_to_db();
+    }
     
-    public static function get_products($product_id){
-        $query="SELECT ID_CARRITO, ID_USUARIO, ID_PROD, CANTIDAD, PRECIO_UNITARIO FROM CARRITO_COMPRAS WHERE id_prod= ?";
-        $params = array(
-            array(
-                "param_type" => "i",
-                "param_value" => $product_id
-            )
-        );
+    public function getShoppingCart(): array {
+        $query = "SELECT id_carrito, id_prod, cantidad, precio_unitario 
+                  FROM carrito_compras 
+                  WHERE id_usuario = ?";
         
-        $cartResult = $this->getDBResult($query, $params);
-        return $cartResult;
+        $stmt = $this->connection->prepare($query);
+        if (!$stmt) {
+            throw new Exception("Error preparando la consulta: " . $this->connection->error);
+        }
+    
+        $stmt->bind_param("i", $this->id_usuario);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    public static function updateCart($cantidad, $id_carrito, $id_prod){
-        $query = "UPDATE carrito_compras SET  cantidad = ? WHERE id_carrito= ? AND id_prod= ?";
-        
-        $params = array(
-            array(
-                "param_type" => "i",
-                "param_value" => $cantidad
-            ),
-            array(
-                "param_type" => "i",
-                "param_value" => $id_carrito
-            ),
-            array(
-                "param_type" => "i",
-                "param_value" => $id_prod
-            )
-        );
-        
-        $this->updateDB($query, $params);
+    public function updateCart($cantidad, $id_carrito, $id_usuario, $id_prod) {
+        $query = "UPDATE carrito_compras SET cantidad = ? WHERE id_carrito = ? AND id_usuario = ? AND id_prod = ?";
+        $stmt = $this->connection->prepare($query);
+        $stmt->bind_param("iiii", $cantidad, $id_carrito, $id_usuario, $id_prod);
+        return $stmt->execute();
     }
 
-    function deleteCartItem($id_carrito)
-    {
-        $query = "DELETE FROM carrito_compras WHERE id_carrito = ?";
-        
-        $params = array(
-            array(
-                "param_type" => "i",
-                "param_value" => $id_carrito
-            )
-        );
-        
-        $this->updateDB($query, $params);
+    public function deleteCartItem($id_carrito, $id_usuario, $id_prod) {
+        $query = "DELETE FROM carrito_compras WHERE id_carrito = ? AND id_usuario = ? AND id_prod = ?";
+        $stmt = $this->connection->prepare($query);
+        $stmt->bind_param("iii", $id_carrito, $id_usuario, $id_prod);
+        return $stmt->execute();
+    }
+    
+    public function addCartItem($id_carrito, $id_usuario, $id_prod, $cantidad, $precio_unitario) {
+        $checkQuery = "SELECT cantidad FROM carrito_compras WHERE id_carrito = ? AND id_usuario = ? AND id_prod = ?";
+        $stmt = $this->connection->prepare($checkQuery);
+        $stmt->bind_param("iii", $id_carrito, $id_usuario, $id_prod);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $nuevaCantidad = $row['cantidad'] + $cantidad;
+
+            $updateQuery = "UPDATE carrito_compras SET cantidad = ?, precio_unitario = ? WHERE id_carrito = ? AND id_usuario = ? AND id_prod = ?";
+            $stmtUpdate = $this->connection->prepare($updateQuery);
+            $stmtUpdate->bind_param("diiii", $nuevaCantidad, $precio_unitario, $id_carrito, $id_usuario, $id_prod);
+            return $stmtUpdate->execute();
+        } else {
+            $insertQuery = "INSERT INTO carrito_compras (id_carrito, id_usuario, id_prod, cantidad, precio_unitario) VALUES (?, ?, ?, ?, ?)";
+            $stmtInsert = $this->connection->prepare($insertQuery);
+            $stmtInsert->bind_param("iiiid", $id_carrito, $id_usuario, $id_prod, $cantidad, $precio_unitario);
+            return $stmtInsert->execute();
+        }
+    }
+
+    public function clearCart($id_carrito, $id_usuario) {
+        $query = "DELETE FROM carrito_compras WHERE id_carrito = ? AND id_usuario = ?";
+        $stmt = $this->connection->prepare($query);
+        $stmt->bind_param("ii", $id_carrito, $id_usuario);
+        return $stmt->execute();
     }
 
 }

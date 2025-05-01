@@ -38,8 +38,9 @@ class Product
             p.stock, 
             d.nombre_departamento AS nombre_departamento, 
             m.nombre_marca AS nombre_marca, 
-            o.descuento AS descuento
+            o.descuento AS descuento,
             COALESCE(r.rating_promedio, 0) AS rating
+            p.precio * (1 - IFNULL(o.descuento, 0) / 100) AS precio_descuento
         FROM 
             producto p
         INNER JOIN 
@@ -90,8 +91,9 @@ class Product
             p.stock, 
             d.nombre_departamento AS nombre_departamento, 
             m.nombre_marca AS nombre_marca, 
-            o.descuento AS descuento
+            o.descuento AS descuento,
             COALESCE(r.rating_promedio, 0) AS rating
+            p.precio * (1 - IFNULL(o.descuento, 0) / 100) AS precio_descuento
         FROM 
             producto p
         INNER JOIN 
