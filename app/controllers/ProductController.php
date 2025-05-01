@@ -11,6 +11,7 @@ class ProductController
 
       foreach ($product as $data) {
         $json = new stdClass;
+        $json->id_producto = $data["id_prod"];
         $json->nombre = $data["nombre_prod"];
         $json->nombrecorto = $data["nombrecorto_prod"];
         $json->descripcion = $data["descripcion_prod"];
