@@ -2,6 +2,8 @@
 require_once __DIR__ . '/../app/middlewares/cors.php';
 require_once __DIR__ . '/../app/controllers/UserController.php';
 require_once __DIR__ . '/../app/controllers/ProductController.php';
+require_once __DIR__ . '/../app/controllers/ShoppingCartController.php';
+require_once __DIR__ . '/../app/controllers/CheckoutController.php';
 require __DIR__ . '/../vendor/autoload.php';
 
 if (isset($_SERVER['HTTP_ORIGIN'])) {
@@ -24,6 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 	exit(0);
 }
 
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 Flight::group("/user", function () {
   Flight::route("GET /", 'UserController->getUser');
   Flight::route("POST /auth", 'UserController->authUser');
@@ -35,12 +40,16 @@ Flight::group("/product", function () {
   Flight::route("GET /@id_prod", ['ProductController', 'getProduct']);
 });
 
-Flight::groupt("/shopping-cart", function() {
-	Flight::route("GET /@id_user", ['ShoppingCartController-getShoppingCart']);
-	Flight::route("POST /add", ['ShoppingCartController', 'addCartItem']);
-	Flight::route("PUT /update", ['ShoppingCartController', 'updateCartItem']);
-	Flight::route("DELETE /delete", ['ShoppingCartController', 'deleteCartItem']);
+Flight::group("/shopping-cart", function() {
+	Flight::route("GET /@id_user", ['ShoppingCartController', 'getShoppingCart']);
+	Flight::route("POST /", ['ShoppingCartController', 'addCartItem']);
+	Flight::route("PUT /@id_user", ['ShoppingCartController', 'updateCartItem']);
+	Flight::route("DELETE /@id_user", ['ShoppingCartController', 'deleteCartItem']);
 	Flight::route("DELETE /clear", ['ShoppingCartController', 'clearCart']);
+});
+
+Flight::group("/checkout-session", function(){
+	Flight::route("POST /", ["CheckoutController", "createCheckout"]);
 });
 
 Flight::start();

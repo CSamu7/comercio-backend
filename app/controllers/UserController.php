@@ -53,6 +53,7 @@ class UserController
 
       foreach ($user as $data) {
         $json = new stdClass;
+        $json->id = $data["id_usuario"];
         $json->nombre = $data["nombre"];
         $json->apeP = $data["apeP"];
         $json->apeM = $data["apeM"];

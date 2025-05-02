@@ -3,13 +3,18 @@ require_once __DIR__ . '/../models/cart.php';
 
 class ShoppingCartController
 {
-  public static function getShoppingCart(){
+  public static function getShoppingCart($id_user){
     try {
-      $id_user = Flight::request()->data->id_user;
+      $user_cart = [];
 
-      $cart = new Cart();
+      $cart = new Cart((int) $id_user);
+      $products = $cart->getShoppingCart();
+
+      foreach ($products as $product) {
+        array_push($user_cart, $product);
+      }
       
-      echo json_encode(["token" => $token]);
+      echo json_encode($user_cart);
     } catch (\Throwable $th) {
       echo json_encode(["msg" => $th->getMessage()]);
     }
@@ -45,27 +50,16 @@ class ShoppingCartController
         }
     }
 
-    public static function updateCartItem()
+    public static function updateCartItem($id_user)
     {
         try {
-            $data = Flight::request()->data;
+            $id_prod = Flight::request()->data->id_prod;
+            $cantidad = Flight::request()->data->cantidad;
 
-            $id_user = $data->id_user ?? null;
-            $id_carrito = $data->id_carrito ?? null;
-            $id_prod = $data->id_prod ?? null;
-            $cantidad = $data->cantidad ?? null;
+            $cart = new Cart($id_user);
+            $result = $cart->updateCart($cantidad, $id_prod);
 
-            if (!is_numeric($id_user) || !is_numeric($id_carrito) || !is_numeric($id_prod) || !is_numeric($cantidad)) {
-                Flight::jsonHalt(['msg' => "Datos inválidos o incompletos"], 400);
-            }
-
-            $cart = new Cart((int)$id_user);
-            $result = $cart->updateCart((int)$cantidad, (int)$id_carrito, (int)$id_prod);
-
-            echo json_encode([
-                "success" => $result,
-                "msg" => $result ? "Cantidad actualizada correctamente" : "Error al actualizar cantidad"
-            ]);
+            echo json_encode($result);
         } catch (\Throwable $th) {
             echo json_encode([
                 "success" => false,
@@ -74,26 +68,15 @@ class ShoppingCartController
         }
     }
 
-    public static function deleteCartItem()
+    public static function deleteCartItem($id_user)
     {
         try {
-            $data = Flight::request()->data;
+            $id_prod = Flight::request()->data->id_prod;
 
-            $id_user = $data->id_user ?? null;
-            $id_carrito = $data->id_carrito ?? null;
-            $id_prod = $data->id_prod ?? null;
+            $cart = new Cart($id_user);
+            $result = $cart->deleteCartItem($id_prod);
 
-            if (!is_numeric($id_user) || !is_numeric($id_carrito) || !is_numeric($id_prod)) {
-                Flight::jsonHalt(['msg' => "Datos inválidos o incompletos"], 400);
-            }
-
-            $cart = new Cart((int)$id_user);
-            $result = $cart->deleteCartItem((int)$id_carrito, (int)$id_prod);
-
-            echo json_encode([
-                "success" => $result,
-                "msg" => $result ? "Producto eliminado correctamente" : "Error al eliminar producto"
-            ]);
+            echo json_encode($result);
         } catch (\Throwable $th) {
             echo json_encode([
                 "success" => false,
@@ -117,10 +100,7 @@ class ShoppingCartController
             $cart = new Cart((int)$id_user);
             $result = $cart->clearCart((int)$id_carrito);
 
-            echo json_encode([
-                "success" => $result,
-                "msg" => $result ? "Carrito vaciado correctamente" : "Error al vaciar carrito"
-            ]);
+            echo json_encode($result);
         } catch (\Throwable $th) {
             echo json_encode([
                 "success" => false,
