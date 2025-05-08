@@ -20,7 +20,6 @@ class UserController
 {
     try {
         $data = Flight::request()->data;
-
         // Validación del correo electrónico
         $email = filter_var($data->email, FILTER_VALIDATE_EMAIL);
         if (!$email) {
@@ -35,7 +34,6 @@ class UserController
         echo json_encode(["msg" => $th->getMessage()]);
     }
 }
-
 
   public static function getUser()
   {

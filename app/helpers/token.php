@@ -4,7 +4,7 @@ use Firebase\JWT\Key;
 
 class Token{
   public static function encode_token(array $payload){
-    $key = 'ykesuncabron'; //Sacar llave del .env
+    $key = 'ykesuncabron';
   
     $jwt = JWT::encode($payload, $key, "HS256");
   }
@@ -13,7 +13,7 @@ class Token{
     try {
       $split_token = explode(" ", $token);
       $jwt = $split_token[1];
-  
+
       $decoded = JWT::decode($jwt, new Key("ykesuncabron", "HS256"));
     
       return $decoded;

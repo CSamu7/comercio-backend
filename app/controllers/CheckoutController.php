@@ -1,12 +1,11 @@
 <?php
 require_once $_SERVER["DOCUMENT_ROOT"] . '/backend/vendor/autoload.php';
 
-
 class CheckoutController
 {
   public function createCheckout()
   {
-    $shoppingCart = Flight::request()->data->shoppingCart;
+    $shoppingCart = Flight::request()->data;
     Stripe\Stripe::setApiKey($_ENV["STRIPE_SECRET_KEY"]);
 
     try {
@@ -15,7 +14,7 @@ class CheckoutController
       $checkout_session = \Stripe\Checkout\Session::create([
         "mode" => "payment",
         "success_url" => "http://localhost:5173/payment-success",
-        "line_items" => $line_items
+        "line_items" => $line_items,
       ]);
 
       echo json_encode($checkout_session);
@@ -24,7 +23,7 @@ class CheckoutController
     }
   }
 
-  public function createLineItems($shoppingItems){
+  private function createLineItems($shoppingItems){
     $line_items = [];
 
     foreach($shoppingItems as $shoppingItem){
@@ -34,9 +33,10 @@ class CheckoutController
           "currency" => "mxn",
           "unit_amount" => $shoppingItem["precio"] * 100,
           "product_data" => [
-            "name" => $shoppingItem["nombre"]
+            "name" => $shoppingItem["nombre"],
+            "metadata" => ["id" => $shoppingItem["id_prod"]]
           ]
-        ]
+        ],
       ];
 
       array_push($line_items, $item);

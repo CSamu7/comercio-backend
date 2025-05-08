@@ -19,11 +19,11 @@ class Cart{
     public function getShoppingCart(): array {
         $rows = [];
 
-        $query = "SELECT c.id_prod, c.cantidad, p.precio, p.nombre_prod AS nombre, p.precio, p.url_imagen,p.stock
-                  FROM carrito_compras c
+        $query = "SELECT p.nombre_prod AS nombre, p.id_prod, p.precio, p.url_imagen,p.stock, c.cantidad
+                  FROM carrito c
                   INNER JOIN 
-                  producto p ON c.id_prod = p.id_prod
-                  WHERE id_usuario = ?" ;
+                  producto p ON p.id_prod = c.id_producto
+                  WHERE c.id_usuario = ?" ;
 
         $stmt = $this->connection->prepare($query);
         $stmt->execute([$this->id_usuario]);
@@ -42,10 +42,9 @@ class Cart{
     }
 
     public function updateCart($cantidad, $id_prod) {
-        //No esta checando el stack
         $rows = [];
 
-        $query = "UPDATE carrito_compras SET cantidad = ? WHERE id_usuario = ? AND id_prod = ?";
+        $query = "UPDATE carrito SET cantidad = ? WHERE id_usuario = ? AND id_producto = ?";
         $stmt = $this->connection->prepare($query);
         $stmt->bind_param("iii", $cantidad, $this->id_usuario, $id_prod);
         $stmt->execute();
@@ -56,20 +55,21 @@ class Cart{
     }
 
     public function deleteCartItem($id_prod) {
-        $query = "DELETE FROM carrito_compras WHERE id_usuario = ? AND id_prod = ?";
+        $query = "DELETE FROM carrito WHERE id_usuario = ? AND id_producto = ?";
         $stmt = $this->connection->prepare($query);
         $stmt->bind_param("ii", $this->id_usuario, $id_prod);
         $stmt->execute();
+        $result = $stmt->get_result();
 
         $rows = $this->getShoppingCart();
 
         return $rows;
     }
     
-    public function addCartItem($id_carrito, $id_usuario, $id_prod, $cantidad, $precio_unitario) {
-        $checkQuery = "SELECT cantidad FROM carrito_compras WHERE id_carrito = ? AND id_usuario = ? AND id_prod = ?";
+    public function addCartItem($id_prod, $cantidad) {
+        $checkQuery = "SELECT cantidad FROM carrito WHERE id_usuario = ? AND id_producto = ?";
         $stmt = $this->connection->prepare($checkQuery);
-        $stmt->bind_param("iii", $id_carrito, $id_usuario, $id_prod);
+        $stmt->bind_param("ii", $this->id_usuario, $id_prod);
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -77,23 +77,25 @@ class Cart{
             $row = $result->fetch_assoc();
             $nuevaCantidad = $row['cantidad'] + $cantidad;
 
-            $updateQuery = "UPDATE carrito_compras SET cantidad = ?, precio_unitario = ? WHERE id_carrito = ? AND id_usuario = ? AND id_prod = ?";
-            $stmtUpdate = $this->connection->prepare($updateQuery);
-            $stmtUpdate->bind_param("diiii", $nuevaCantidad, $precio_unitario, $id_carrito, $id_usuario, $id_prod);
-            return $stmtUpdate->execute();
-        } else {
-            $insertQuery = "INSERT INTO carrito_compras (id_carrito, id_usuario, id_prod, cantidad, precio_unitario) VALUES (?, ?, ?, ?, ?)";
-            $stmtInsert = $this->connection->prepare($insertQuery);
-            $stmtInsert->bind_param("iiiid", $id_carrito, $id_usuario, $id_prod, $cantidad, $precio_unitario);
-            return $stmtInsert->execute();
-        }
+            $rows = $this->updateCart($nuevaCantidad, $id_prod);
+            return $rows;
+        } 
+        
+        $insertQuery = "INSERT INTO carrito (id_usuario, id_producto, cantidad) VALUES (?, ?, ?)";
+        $stmtInsert = $this->connection->prepare($insertQuery);
+        $stmtInsert->bind_param("iii", $this->id_usuario, $id_prod, $cantidad);
+        
+        return $stmtInsert->execute();
     }
 
     public function clearCart($id_carrito, $id_usuario) {
-        $query = "DELETE FROM carrito_compras WHERE id_carrito = ? AND id_usuario = ?";
+        $query = "DELETE FROM carrito WHERE id_usuario = ?";
         $stmt = $this->connection->prepare($query);
         $stmt->bind_param("ii", $id_carrito, $id_usuario);
         return $stmt->execute();
     }
 
+    private function isProductInCart(){
+        
+    }
 }

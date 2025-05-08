@@ -4,6 +4,7 @@ require_once __DIR__ . '/../app/controllers/UserController.php';
 require_once __DIR__ . '/../app/controllers/ProductController.php';
 require_once __DIR__ . '/../app/controllers/ShoppingCartController.php';
 require_once __DIR__ . '/../app/controllers/CheckoutController.php';
+require_once __DIR__ . '/../app/controllers/WebhookController.php';
 require __DIR__ . '/../vendor/autoload.php';
 
 if (isset($_SERVER['HTTP_ORIGIN'])) {
@@ -35,21 +36,28 @@ Flight::group("/user", function () {
   Flight::route("POST /", 'UserController->postUser');
 });
 
+Flight::group("/shopping-cart", function(){
+	Flight::route("GET /@id_user", 'ShoppingCartController->getShoppingCart');
+	Flight::route("POST /", 'ShoppingCartController->addCartItem');
+	Flight::route("PUT /@id_user", 'ShoppingCartController->updateCartItem');
+	Flight::route("DELETE /", 'ShoppingCartController->deleteCartItem');
+});
+
 Flight::group("/product", function () {
   Flight::route("GET /", ['ProductController', 'getProducts']);
   Flight::route("GET /@id_prod", ['ProductController', 'getProduct']);
 });
 
-Flight::group("/shopping-cart", function() {
-	Flight::route("GET /@id_user", ['ShoppingCartController', 'getShoppingCart']);
-	Flight::route("POST /", ['ShoppingCartController', 'addCartItem']);
-	Flight::route("PUT /@id_user", ['ShoppingCartController', 'updateCartItem']);
-	Flight::route("DELETE /@id_user", ['ShoppingCartController', 'deleteCartItem']);
-	Flight::route("DELETE /clear", ['ShoppingCartController', 'clearCart']);
-});
-
 Flight::group("/checkout-session", function(){
 	Flight::route("POST /", ["CheckoutController", "createCheckout"]);
+});
+
+Flight::group("/webhook", function(){
+	Flight::route("POST /","WebhookController->observeEvent");
+});
+
+Flight::group("/payment", function(){
+	Flight::route("POST /", "PaymentController->createPayment");
 });
 
 Flight::start();
