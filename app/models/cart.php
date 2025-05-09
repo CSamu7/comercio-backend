@@ -67,11 +67,7 @@ class Cart{
     }
     
     public function addCartItem($id_prod, $cantidad) {
-        $checkQuery = "SELECT cantidad FROM carrito WHERE id_usuario = ? AND id_producto = ?";
-        $stmt = $this->connection->prepare($checkQuery);
-        $stmt->bind_param("ii", $this->id_usuario, $id_prod);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $this->getProduct($id_prod);
 
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
@@ -79,13 +75,26 @@ class Cart{
 
             $rows = $this->updateCart($nuevaCantidad, $id_prod);
             return $rows;
-        } 
+        }
         
-        $insertQuery = "INSERT INTO carrito (id_usuario, id_producto, cantidad) VALUES (?, ?, ?)";
-        $stmtInsert = $this->connection->prepare($insertQuery);
-        $stmtInsert->bind_param("iii", $this->id_usuario, $id_prod, $cantidad);
-        
-        return $stmtInsert->execute();
+        $query = "INSERT INTO carrito (id_usuario, id_producto, cantidad) VALUES (?, ?, ?)";
+        $stmt = $this->connection->prepare($query);
+        $stmt->bind_param("iii", $this->id_usuario, $id_prod, $cantidad);
+        $stmt->execute();
+
+        $rows = $this->getShoppingCart();
+
+        return $rows;
+    }
+
+    private function getProduct($id_prod) {
+        $checkQuery = "SELECT cantidad FROM carrito WHERE id_usuario = ? AND id_producto = ?";
+        $stmt = $this->connection->prepare($checkQuery);
+        $stmt->bind_param("ii", $this->id_usuario, $id_prod);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        return $result;
     }
 
     public function clearCart($id_carrito, $id_usuario) {
@@ -93,9 +102,5 @@ class Cart{
         $stmt = $this->connection->prepare($query);
         $stmt->bind_param("ii", $id_carrito, $id_usuario);
         return $stmt->execute();
-    }
-
-    private function isProductInCart(){
-        
     }
 }
