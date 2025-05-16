@@ -1,10 +1,15 @@
 <?php
 require_once $_SERVER["DOCUMENT_ROOT"] . '/backend/vendor/autoload.php';
+require_once __DIR__ . '/../helpers/token.php';
 
 class CheckoutController
 {
   public function createCheckout()
   {
+    $token = Flight::request()->header("Authorization");
+    $token_decoded = Token::decode_token($token);
+    $id_user = $token_decoded->id;
+
     $shoppingCart = Flight::request()->data;
     Stripe\Stripe::setApiKey($_ENV["STRIPE_SECRET_KEY"]);
 
@@ -15,6 +20,9 @@ class CheckoutController
         "mode" => "payment",
         "success_url" => "http://localhost:5173/payment-success",
         "line_items" => $line_items,
+        "metadata" => [
+          "id_user" => $id_user
+        ]
       ]);
 
       echo json_encode($checkout_session);

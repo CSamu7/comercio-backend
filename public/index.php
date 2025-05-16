@@ -5,6 +5,7 @@ require_once __DIR__ . '/../app/controllers/ProductController.php';
 require_once __DIR__ . '/../app/controllers/ShoppingCartController.php';
 require_once __DIR__ . '/../app/controllers/CheckoutController.php';
 require_once __DIR__ . '/../app/controllers/WebhookController.php';
+require_once __DIR__ . '/../app/controllers/SaleController.php';
 require __DIR__ . '/../vendor/autoload.php';
 
 if (isset($_SERVER['HTTP_ORIGIN'])) {
@@ -56,8 +57,8 @@ Flight::group("/webhook", function(){
 	Flight::route("POST /","WebhookController->observeEvent");
 });
 
-Flight::group("/payment", function(){
-	Flight::route("POST /", "PaymentController->createPayment");
+Flight::group("/sale", function(){
+	Flight::route("POST /", "SaleController->createSale");
 });
 
 Flight::start();

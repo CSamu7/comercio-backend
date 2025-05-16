@@ -8,19 +8,6 @@ require_once $_SERVER["DOCUMENT_ROOT"] . '/backend/vendor/autoload.php';
 
 class Product
 {
-  public function __construct(
-    private string $nombre,
-    private string $nombrecorto,
-    private string $descripcion,
-    private int $precio,
-    private string $url_imagen,
-    private int $stock,
-    private int $id_departamento,
-    private int $id_marcha,
-    private int $id_oferta,
-  ) {
-  }
-
   public static function get_product(int $id): array
 {
     $db = new Database();
@@ -72,7 +59,6 @@ class Product
 
     return $rows;
 }
-
 
   public static function get_products(): array
   {

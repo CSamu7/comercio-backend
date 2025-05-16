@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/SaleController.php';
+
 class WebhookController {
   public function observeEvent(){
     $stripe = new \Stripe\StripeClient($_ENV["STRIPE_SECRET_KEY"]);
@@ -21,11 +23,19 @@ class WebhookController {
           ['expand' => ["line_items.data.price.product"]]
         );
 
-        print_r($session);
+        $total = $event->data->object->amount_total / 100;
+        $id_user = $event->data->object->metadata->id_user;
+
+        $sale = new SaleController();
+        $id_sale = $sale->processSale((int) $id_user, $total);
+        // $sale->createSaleDetails($id_sale, $session->line_items->data);
+
+      case 'checkout.session.expired':
+
         break;
         default:
-        echo 'Received unknown event type ' . $event->type; 
-      }
+          echo 'Received unknown event type ' . $event->type; 
+    }
       
     Flight::response()->status(200);
   }
